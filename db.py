@@ -3,87 +3,89 @@ import sqlite3
 
 DB_NAME = "routeguard.db"
 
-# Coordinate mapping for key Chitral locations
+# Master coordinate lookup for key Chitral corridors & passes
 LOCATION_COORDS = {
-    "Lowari Tunnel": (35.3536, 71.8021),
-    "Lowari Tunnel North Portal": (35.3536, 71.8021),
-    "Drosh": (35.5589, 71.7964),
-    "Chitral Town": (35.8510, 71.7869),
-    "Kuragh Point (Booni Road)": (36.0353, 72.0838),
-    "Kuragh": (36.0353, 72.0838),
-    "Booni": (36.2711, 72.0886),
-    "Mastuj": (36.2794, 72.5161),
-    "Shandur Top": (36.0853, 72.5481),
-    "Shandur Pass": (36.0853, 72.5481),
+    "lowari tunnel": [35.3524, 71.7869],
+    "lowari tunnel north portal": [35.3524, 71.7869],
+    "lowari tunnel south portal": [35.3175, 71.7942],
+    "kuragh": [36.0353, 72.0831],
+    "shandur": [36.0853, 72.5481],
+    "shandur top": [36.0853, 72.5481],
+    "shandur pass": [36.0853, 72.5481],
+    "drosh": [35.5592, 71.7961],
+    "booni": [36.2731, 72.0883],
+    "chitral town": [35.8510, 71.7869],
+    "garam chashma": [36.0234, 71.5302],
+    "mastuj": [36.2825, 72.5113],
+    "ayun": [35.6882, 71.7821],
+    "bumburet": [35.6811, 71.6667],
 }
 
+DEFAULT_COORDS = [35.8510, 71.7869]  # Default Chitral Center
 
-def get_coords_for_location(location_name: str) -> tuple:
-    """Matches a location string to latitude/longitude coordinates."""
-    for key, coords in LOCATION_COORDS.items():
-        if key.lower() in location_name.lower():
-            return coords
-    # Default to central Chitral if location is unspecified
-    return (35.8510, 71.7869)
+
+def get_db_connection():
+    conn = sqlite3.connect(DB_NAME)
+    conn.row_factory = sqlite3.Row
+    return conn
 
 
 def init_db():
-    """Initializes the SQLite database with required tables and seed data."""
-    conn = sqlite3.connect(DB_NAME)
+    conn = get_db_connection()
     cursor = conn.cursor()
 
     cursor.execute("""
-        CREATE TABLE IF NOT EXISTS reports (
+        CREATE TABLE IF NOT EXISTS route_reports (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             location TEXT NOT NULL,
             status TEXT NOT NULL,
-            cause TEXT NOT NULL,
-            severity TEXT NOT NULL,
+            cause TEXT,
+            severity TEXT,
             estimated_clearance TEXT,
             summary_urdu TEXT,
-            reporter_phone TEXT DEFAULT 'Anonymous',
-            is_verified INTEGER DEFAULT 1,
+            reporter_phone TEXT,
             timestamp DATETIME DEFAULT CURRENT_TIMESTAMP
         )
     """)
 
-    cursor.execute("SELECT COUNT(*) FROM reports")
+    cursor.execute("SELECT COUNT(*) FROM route_reports")
     if cursor.fetchone()[0] == 0:
         seed_data = [
             (
                 "Lowari Tunnel North Portal",
+                "BLOCKED",
+                "Snow",
+                "HIGH",
+                "4 Hours",
+                "لواری ٹنل نارتھ پورٹل کے قریب شدید برف باری کی وجہ سے راستہ مکمل طور پر بند ہے، کلیئرنس میں 4 گھنٹے لگ سکتے ہیں۔",
+                "+923000000001",
+                "2026-09-26 08:30:00",
+            ),
+            (
+                "Kuragh",
+                "ONE_WAY",
+                "Landslide",
+                "MEDIUM",
+                "2 Hours",
+                "کورغ کے مقام پر ملبہ ہٹانے کا کام جاری ہے، سڑک ایک طرفہ ٹریفک کے لیے کھلی ہے۔",
+                "+923000000002",
+                "2026-09-26 09:15:00",
+            ),
+            (
+                "Shandur Top",
                 "CLEAR",
                 "Clear",
                 "LOW",
                 "Operational",
-                "لواری ٹنل پر ٹریفک کی آمد و رفت معمول کے مطابق جاری ہے۔",
-                "+923001234567",
-                1,
-            ),
-            (
-                "Kuragh Point (Booni Road)",
-                "BLOCKED",
-                "Landslide",
-                "HIGH",
-                "2 to 3 hours",
-                "کورغ کے مقام پر شدید لینڈ سلائیڈنگ کی وجہ سے سڑک دونوں طرف سے بند ہے۔",
-                "+923009876543",
-                1,
-            ),
-            (
-                "Shandur Top",
-                "ONE_WAY",
-                "Snow",
-                "MEDIUM",
-                "1 hour",
-                "شندور ٹاپ پر سڑک سے برف ہٹائی جا رہی ہے، ایک طرفہ ٹریفک جاری ہے۔",
-                "+923005551234",
-                1,
+                "شندور ٹاپ پر موسم صاف ہے اور سڑک تمام ہلکی گاڑیوں کے لیے مکمل طور پر کھلی ہے۔",
+                "+923000000003",
+                "2026-09-26 10:00:00",
             ),
         ]
         cursor.executemany(
             """
-            INSERT INTO reports (location, status, cause, severity, estimated_clearance, summary_urdu, reporter_phone, is_verified)
+            INSERT INTO route_reports 
+            (location, status, cause, severity, estimated_clearance, summary_urdu, reporter_phone, timestamp)
             VALUES (?, ?, ?, ?, ?, ?, ?, ?)
         """,
             seed_data,
@@ -93,48 +95,53 @@ def init_db():
     conn.close()
 
 
-def add_report(report_dict: dict, reporter_phone: str = "Anonymous"):
-    """Inserts a new report into the database."""
-    conn = sqlite3.connect(DB_NAME)
+def get_all_reports():
+    conn = get_db_connection()
     cursor = conn.cursor()
+    cursor.execute(
+        "SELECT * FROM route_reports ORDER BY id DESC"
+    )
+    rows = cursor.fetchall()
+    conn.close()
+    return [dict(row) for row in rows]
+
+
+def add_report(data: dict, reporter_phone: str = "Anonymous") -> int:
+    conn = get_db_connection()
+    cursor = conn.cursor()
+
+    now_str = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
     cursor.execute(
         """
-        INSERT INTO reports (location, status, cause, severity, estimated_clearance, summary_urdu, reporter_phone, is_verified)
+        INSERT INTO route_reports 
+        (location, status, cause, severity, estimated_clearance, summary_urdu, reporter_phone, timestamp)
         VALUES (?, ?, ?, ?, ?, ?, ?, ?)
     """,
         (
-            report_dict.get("location", "Unknown Location"),
-            report_dict.get("status", "HAZARD"),
-            report_dict.get("cause", "Unspecified"),
-            report_dict.get("severity", "MEDIUM"),
-            report_dict.get("estimated_clearance", "Unknown"),
-            report_dict.get("summary_urdu", ""),
+            data.get("location", "Unknown Location"),
+            data.get("status", "HAZARD"),
+            data.get("cause", "Unspecified"),
+            data.get("severity", "MEDIUM"),
+            data.get("estimated_clearance", "Unknown"),
+            data.get("summary_urdu", ""),
             reporter_phone,
-            1,
+            now_str,
         ),
     )
 
+    report_id = cursor.lastrowid
     conn.commit()
     conn.close()
+    return report_id
 
 
-def get_all_reports():
-    """Fetches all verified reports ordered by latest first."""
-    conn = sqlite3.connect(DB_NAME)
-    conn.row_factory = sqlite3.Row
-    cursor = conn.cursor()
+def get_coords_for_location(location_name: str) -> list:
+    """Fuzzy matching coordinate resolution for standard Chitral locations."""
+    loc_clean = location_name.strip().lower()
 
-    cursor.execute(
-        "SELECT * FROM reports WHERE is_verified = 1 ORDER BY timestamp DESC"
-    )
-    rows = cursor.fetchall()
+    for key, coords in LOCATION_COORDS.items():
+        if key in loc_clean or loc_clean in key:
+            return coords
 
-    reports = [dict(row) for row in rows]
-    conn.close()
-    return reports
-
-
-if __name__ == "__main__":
-    init_db()
-    print("✅ Database updated with location coordinates!")
+    return DEFAULT_COORDS
