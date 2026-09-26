@@ -130,15 +130,34 @@ reports = db.get_all_reports()
 
 # Sidebar Overview
 st.sidebar.markdown("### 📍 Corridor Overview")
+
 total_routes = len(reports)
 blocked_routes = sum(1 for r in reports if r["status"] == "BLOCKED")
 hazard_routes = sum(1 for r in reports if r["status"] in ["ONE_WAY", "HAZARD"])
 clear_routes = sum(1 for r in reports if r["status"] == "CLEAR")
 
-st.sidebar.metric("Monitored Reports", total_routes)
-st.sidebar.metric("🔴 Blocked Routes", blocked_routes)
-st.sidebar.metric("🟡 Partial Hazards", hazard_routes)
-st.sidebar.metric("🟢 Clear Corridors", clear_routes)
+# Styled Sidebar Metric Cards
+st.sidebar.markdown(
+    f"""
+    <div class="sidebar-metric-card sidebar-card-total">
+        <div class="sidebar-metric-label">Monitored Reports</div>
+        <div class="sidebar-metric-value">{total_routes}</div>
+    </div>
+    <div class="sidebar-metric-card sidebar-card-blocked">
+        <div class="sidebar-metric-label">🔴 Blocked Routes</div>
+        <div class="sidebar-metric-value">{blocked_routes}</div>
+    </div>
+    <div class="sidebar-metric-card sidebar-card-hazard">
+        <div class="sidebar-metric-label">🟡 Partial Hazards</div>
+        <div class="sidebar-metric-value">{hazard_routes}</div>
+    </div>
+    <div class="sidebar-metric-card sidebar-card-clear">
+        <div class="sidebar-metric-label">🟢 Clear Corridors</div>
+        <div class="sidebar-metric-value">{clear_routes}</div>
+    </div>
+    """,
+    unsafe_allow_html=True,
+)
 
 st.sidebar.divider()
 st.sidebar.caption("System Status: **Active (2G Optimized)**")

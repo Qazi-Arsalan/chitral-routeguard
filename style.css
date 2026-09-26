@@ -131,3 +131,33 @@ body {
     font-weight: 700;
     margin-bottom: 0.5rem;
 }
+/* Sidebar Metric Cards Styling */
+.sidebar-metric-card {
+    background-color: #FFFFFF;
+    border: 1px solid #E2E8F0;
+    border-radius: 8px;
+    padding: 0.85rem 1rem;
+    margin-bottom: 0.75rem;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+}
+
+.sidebar-metric-label {
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: #64748B;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 0.25rem;
+}
+
+.sidebar-metric-value {
+    font-size: 1.5rem;
+    font-weight: 800;
+    color: #0F172A;
+}
+
+/* Color Accents for Sidebar Metrics */
+.sidebar-card-blocked { border-left: 4px solid #EF4444; }
+.sidebar-card-hazard { border-left: 4px solid #F59E0B; }
+.sidebar-card-clear { border-left: 4px solid #10B981; }
+.sidebar-card-total { border-left: 4px solid #3B82F6; }
