@@ -1,0 +1,106 @@
+/* Container Spacing */
+.main {
+    padding-top: 1rem;
+}
+
+/* Header Typography */
+h1 {
+    font-weight: 800 !important;
+    color: #1E293B;
+    letter-spacing: -0.5px;
+}
+
+/* Custom Advisory Cards */
+.advisory-card-blocked {
+    border-left: 5px solid #EF4444;
+    background-color: #FEF2F2;
+    padding: 1.2rem;
+    border-radius: 8px;
+    margin-bottom: 1rem;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+}
+
+.advisory-card-hazard {
+    border-left: 5px solid #F59E0B;
+    background-color: #FFFBEB;
+    padding: 1.2rem;
+    border-radius: 8px;
+    margin-bottom: 1rem;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+}
+
+.advisory-card-clear {
+    border-left: 5px solid #10B981;
+    background-color: #ECFDF5;
+    padding: 1.2rem;
+    border-radius: 8px;
+    margin-bottom: 1rem;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+}
+
+/* Badge Styling */
+.badge-status {
+    font-weight: 700;
+    padding: 4px 12px;
+    border-radius: 12px;
+    font-size: 0.85rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.badge-blocked {
+    background-color: #FEE2E2;
+    color: #991B1B;
+}
+
+.badge-hazard {
+    background-color: #FEF3C7;
+    color: #92400E;
+}
+
+.badge-clear {
+    background-color: #D1FAE5;
+    color: #065F46;
+}
+
+/* Card Content Grid */
+.card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 8px;
+}
+
+.card-title {
+    margin: 0;
+    color: #0F172A;
+    font-size: 1.25rem;
+}
+
+.card-urdu {
+    font-size: 1.1rem;
+    margin-bottom: 12px;
+    color: #334155;
+    line-height: 1.6;
+}
+
+.card-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 18px;
+    font-size: 0.88rem;
+    color: #475569;
+    border-top: 1px solid rgba(0,0,0,0.05);
+    padding-top: 8px;
+}
+
+/* Streamlit Tab Customization */
+.stTabs [data-baseweb="tab-list"] {
+    gap: 8px;
+}
+
+.stTabs [data-baseweb="tab"] {
+    border-radius: 6px;
+    padding: 8px 16px;
+    font-weight: 600;
+}

@@ -11,7 +11,7 @@ from google.genai import types
 import db
 
 # ---------------------------------------------------------------------------
-# 1. Page Configuration
+# 1. Page Configuration & External CSS Injection
 # ---------------------------------------------------------------------------
 st.set_page_config(
     page_title="Chitral RouteGuard",
@@ -19,12 +19,18 @@ st.set_page_config(
     layout="wide",
 )
 
+def load_css(file_name: str):
+    if os.path.exists(file_name):
+        with open(file_name, "r") as f:
+            st.markdown(f"<style>{f.read()}</style>", unsafe_allow_html=True)
+
+load_css("style.css")
+
 db.init_db()
 
 # ---------------------------------------------------------------------------
 # 2. Pydantic Schema & Gemini AI Parser
 # ---------------------------------------------------------------------------
-
 
 class RoadReport(BaseModel):
     location: str = Field(
@@ -51,9 +57,7 @@ def process_report_with_ai(raw_text: str) -> dict:
     api_key = os.environ.get("GEMINI_API_KEY", "")
 
     if not api_key:
-        st.error(
-            "Gemini API key missing. Please set GEMINI_API_KEY in your environment!"
-        )
+        st.error("Gemini API key missing. Please set GEMINI_API_KEY in your environment!")
         return None
 
     client = genai.Client(api_key=api_key)
@@ -91,7 +95,6 @@ def process_report_with_ai(raw_text: str) -> dict:
     return None
 
 
-# Helper function to select marker icon based on hazard cause
 def get_marker_icon(status: str, cause: str):
     cause_clean = cause.lower()
     if status == "BLOCKED":
@@ -108,7 +111,7 @@ def get_marker_icon(status: str, cause: str):
 
 
 # ---------------------------------------------------------------------------
-# 3. User Interface (Streamlit Dashboard)
+# 3. Dashboard UI & Layout
 # ---------------------------------------------------------------------------
 
 st.title("🏔️ Chitral RouteGuard")
@@ -116,19 +119,22 @@ st.caption("Low-Bandwidth AI Road & Landslide Advisory System | Emergency Portal
 
 reports = db.get_all_reports()
 
-# Sidebar Stats
-st.sidebar.header("📍 Corridor Overview")
+# Sidebar Overview
+st.sidebar.markdown("### 📍 Corridor Overview")
 total_routes = len(reports)
 blocked_routes = sum(1 for r in reports if r["status"] == "BLOCKED")
 hazard_routes = sum(1 for r in reports if r["status"] in ["ONE_WAY", "HAZARD"])
 clear_routes = sum(1 for r in reports if r["status"] == "CLEAR")
 
 st.sidebar.metric("Monitored Reports", total_routes)
-st.sidebar.metric("🔴 Completely Blocked", blocked_routes)
-st.sidebar.metric("🟡 Partial Hazards / One-Way", hazard_routes)
+st.sidebar.metric("🔴 Blocked Routes", blocked_routes)
+st.sidebar.metric("🟡 Partial Hazards", hazard_routes)
 st.sidebar.metric("🟢 Clear Corridors", clear_routes)
 
-# Dashboard Navigation Tabs
+st.sidebar.divider()
+st.sidebar.caption("System Status: **Active (2G Optimized)**")
+
+# Navigation Tabs
 tab1, tab2, tab3 = st.tabs([
     "📢 Public Road Status (2G View)",
     "🗺️ Interactive Corridor Map",
@@ -138,33 +144,57 @@ tab1, tab2, tab3 = st.tabs([
 # --- TAB 1: PUBLIC VIEW ---
 with tab1:
     st.subheader("Live Pass & Route Advisories")
-    st.info("💡 Light-weight text mode enabled for 2G / weak cellular connections.")
+    st.info("💡 Light-weight mode enabled for 2G / weak mobile connections.")
 
     if not reports:
         st.warning("No road advisories currently recorded.")
 
     for r in reports:
-        status_color = "🔴" if r["status"] == "BLOCKED" else ("🟡" if r["status"] in ["ONE_WAY", "HAZARD"] else "🟢")
+        status = r["status"]
+        card_class = (
+            "advisory-card-blocked"
+            if status == "BLOCKED"
+            else (
+                "advisory-card-hazard"
+                if status in ["ONE_WAY", "HAZARD"]
+                else "advisory-card-clear"
+            )
+        )
+        badge_class = (
+            "badge-blocked"
+            if status == "BLOCKED"
+            else (
+                "badge-hazard"
+                if status in ["ONE_WAY", "HAZARD"]
+                else "badge-clear"
+            )
+        )
+        status_icon = "🔴" if status == "BLOCKED" else ("🟡" if status in ["ONE_WAY", "HAZARD"] else "🟢")
 
-        with st.container(border=True):
-            col1, col2, col3 = st.columns([2, 1, 1])
-            with col1:
-                st.markdown(f"### {status_color} {r['location']}")
-                st.markdown(f"**Urdu Summary:** {r['summary_urdu']}")
-            with col2:
-                st.markdown(f"**Status:** `{r['status']}`")
-                st.markdown(f"**Cause:** {r['cause']}")
-                st.markdown(f"**Severity:** `{r['severity']}`")
-            with col3:
-                st.markdown(f"**Est. Clearance:** {r['estimated_clearance']}")
-                st.markdown(f"**Reported At:** {r['timestamp']}")
+        st.markdown(
+            f"""
+            <div class="{card_class}">
+                <div class="card-header">
+                    <h3 class="card-title">{status_icon} {r['location']}</h3>
+                    <span class="badge-status {badge_class}">{status}</span>
+                </div>
+                <div class="card-urdu"><b>Urdu Summary:</b> {r['summary_urdu']}</div>
+                <div class="card-meta">
+                    <div><b>Cause:</b> {r['cause']}</div>
+                    <div><b>Severity:</b> {r['severity']}</div>
+                    <div><b>Est. Clearance:</b> {r['estimated_clearance']}</div>
+                    <div><b>Reported At:</b> {r['timestamp']}</div>
+                </div>
+            </div>
+            """,
+            unsafe_allow_html=True,
+        )
 
 # --- TAB 2: INTERACTIVE MAP ---
 with tab2:
     st.subheader("Chitral Emergency Route Map")
     st.caption("Filter active incidents and inspect corridor map pins.")
 
-    # Filter Controls
     col_f1, col_f2 = st.columns([3, 1])
     with col_f1:
         selected_statuses = st.multiselect(
@@ -176,10 +206,8 @@ with tab2:
     filtered_reports = [r for r in reports if r["status"] in selected_statuses]
 
     with col_f2:
-        st.write("")
         st.metric("Visible Pins", len(filtered_reports))
 
-    # Base Folium Map
     m = folium.Map(location=[35.8510, 71.7869], zoom_start=8)
 
     for r in filtered_reports:
@@ -188,12 +216,12 @@ with tab2:
 
         popup_html = f"""
         <div style="font-family: sans-serif; width: 200px;">
-            <h4 style="margin-bottom: 5px;">{r['location']}</h4>
+            <h4 style="margin-bottom: 5px; color: #0F172A;">{r['location']}</h4>
             <b>Status:</b> {r['status']}<br>
             <b>Cause:</b> {r['cause']}<br>
             <b>Clearance:</b> {r['estimated_clearance']}<br>
             <hr style="margin: 8px 0;">
-            <small>{r['summary_urdu']}</small>
+            <small style="color: #334155;">{r['summary_urdu']}</small>
         </div>
         """
 
@@ -239,7 +267,7 @@ with tab3:
         height=100,
     )
 
-    if st.button("🚀 Process Report via Gemini AI"):
+    if st.button("🚀 Process Report via Gemini AI", type="primary"):
         if user_input.strip():
             with st.spinner("AI analyzing report & updating database..."):
                 parsed_result = process_report_with_ai(user_input)
