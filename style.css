@@ -1,48 +1,81 @@
-/* Container Spacing */
-.main {
-    padding-top: 1rem;
+/* Base Page & Typography Adjustments */
+body {
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+    color: #0F172A;
 }
 
-/* Header Typography */
-h1 {
-    font-weight: 800 !important;
-    color: #1E293B;
-    letter-spacing: -0.5px;
+/* Hero Banner Header Container */
+.hero-header {
+    background: linear-gradient(135deg, #1E293B 0%, #0F172A 100%);
+    color: #FFFFFF;
+    padding: 2rem 2.5rem;
+    border-radius: 12px;
+    margin-bottom: 2rem;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    border: 1px solid #334155;
 }
 
-/* Custom Advisory Cards */
-.advisory-card-blocked {
-    border-left: 5px solid #EF4444;
-    background-color: #FEF2F2;
-    padding: 1.2rem;
+.hero-title {
+    font-size: 2.5rem !important;
+    font-weight: 900 !important;
+    color: #FFFFFF !important;
+    margin: 0 0 0.5rem 0 !important;
+    letter-spacing: -0.8px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.hero-subtitle {
+    font-size: 1.1rem;
+    color: #94A3B8;
+    margin: 0;
+    font-weight: 400;
+}
+
+/* Base Card Styling */
+.advisory-card-blocked, 
+.advisory-card-hazard, 
+.advisory-card-clear {
+    background-color: #FFFFFF;
     border-radius: 8px;
+    padding: 1.25rem;
     margin-bottom: 1rem;
-    box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.advisory-card-blocked {
+    border-left: 6px solid #EF4444;
 }
 
 .advisory-card-hazard {
-    border-left: 5px solid #F59E0B;
-    background-color: #FFFBEB;
-    padding: 1.2rem;
-    border-radius: 8px;
-    margin-bottom: 1rem;
-    box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+    border-left: 6px solid #F59E0B;
 }
 
 .advisory-card-clear {
-    border-left: 5px solid #10B981;
-    background-color: #ECFDF5;
-    padding: 1.2rem;
-    border-radius: 8px;
-    margin-bottom: 1rem;
-    box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+    border-left: 6px solid #10B981;
 }
 
-/* Badge Styling */
+/* Card Header Structure */
+.card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 0.75rem;
+}
+
+.card-title {
+    margin: 0 !important;
+    font-size: 1.35rem !important;
+    font-weight: 700 !important;
+    color: #0F172A;
+}
+
+/* Status Badges */
 .badge-status {
-    font-weight: 700;
     padding: 4px 12px;
-    border-radius: 12px;
+    border-radius: 20px;
+    font-weight: 700;
     font-size: 0.85rem;
     text-transform: uppercase;
     letter-spacing: 0.5px;
@@ -63,44 +96,38 @@ h1 {
     color: #065F46;
 }
 
-/* Card Content Grid */
-.card-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 8px;
-}
-
-.card-title {
-    margin: 0;
-    color: #0F172A;
-    font-size: 1.25rem;
-}
-
+/* Urdu Text Section */
 .card-urdu {
-    font-size: 1.1rem;
-    margin-bottom: 12px;
-    color: #334155;
-    line-height: 1.6;
+    font-size: 1.15rem;
+    color: #1E293B;
+    background-color: #F8FAFC;
+    padding: 0.75rem 1rem;
+    border-radius: 6px;
+    margin-bottom: 0.75rem;
+    direction: rtl;
+    text-align: right;
 }
 
+/* Card Meta Data Row */
 .card-meta {
     display: flex;
     flex-wrap: wrap;
-    gap: 18px;
-    font-size: 0.88rem;
+    gap: 1.5rem;
+    font-size: 0.9rem;
     color: #475569;
-    border-top: 1px solid rgba(0,0,0,0.05);
-    padding-top: 8px;
 }
 
-/* Streamlit Tab Customization */
-.stTabs [data-baseweb="tab-list"] {
-    gap: 8px;
+/* Filter & Input Card Containers */
+.control-card {
+    background-color: #F8FAFC;
+    border: 1px solid #E2E8F0;
+    border-radius: 8px;
+    padding: 1rem;
+    margin-bottom: 1rem;
 }
 
-.stTabs [data-baseweb="tab"] {
-    border-radius: 6px;
-    padding: 8px 16px;
-    font-weight: 600;
+.section-header {
+    color: #1E293B;
+    font-weight: 700;
+    margin-bottom: 0.5rem;
 }

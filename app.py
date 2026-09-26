@@ -19,6 +19,7 @@ st.set_page_config(
     layout="wide",
 )
 
+# Helper function to load external CSS
 def load_css(file_name: str):
     if os.path.exists(file_name):
         with open(file_name, "r") as f:
@@ -114,8 +115,16 @@ def get_marker_icon(status: str, cause: str):
 # 3. Dashboard UI & Layout
 # ---------------------------------------------------------------------------
 
-st.title("🏔️ Chitral RouteGuard")
-st.caption("Low-Bandwidth AI Road & Landslide Advisory System | Emergency Portal")
+# Hero Header Banner
+st.markdown(
+    """
+    <div class="hero-header">
+        <h1 class="hero-title">🏔️ Chitral RouteGuard</h1>
+        <p class="hero-subtitle">Low-Bandwidth AI Road & Landslide Advisory System | Emergency Portal</p>
+    </div>
+    """,
+    unsafe_allow_html=True,
+)
 
 reports = db.get_all_reports()
 
@@ -171,6 +180,7 @@ with tab1:
         )
         status_icon = "🔴" if status == "BLOCKED" else ("🟡" if status in ["ONE_WAY", "HAZARD"] else "🟢")
 
+        # Clean HTML Structure referencing style.css
         st.markdown(
             f"""
             <div class="{card_class}">
@@ -195,6 +205,7 @@ with tab2:
     st.subheader("Chitral Emergency Route Map")
     st.caption("Filter active incidents and inspect corridor map pins.")
 
+    st.markdown('<div class="control-card">', unsafe_allow_html=True)
     col_f1, col_f2 = st.columns([3, 1])
     with col_f1:
         selected_statuses = st.multiselect(
@@ -207,6 +218,7 @@ with tab2:
 
     with col_f2:
         st.metric("Visible Pins", len(filtered_reports))
+    st.markdown('</div>', unsafe_allow_html=True)
 
     m = folium.Map(location=[35.8510, 71.7869], zoom_start=8)
 
@@ -237,7 +249,7 @@ with tab2:
 # --- TAB 3: INPUT PORTAL ---
 with tab3:
     st.subheader("Submit Road Report / Simulate SMS Gateway")
-    st.markdown("Simulate crowd-sourced text reports from drivers, police checkposts, or Rescue 1122.")
+    st.caption("Simulate crowd-sourced text reports from drivers, police checkposts, or Rescue 1122.")
 
     preset = st.selectbox(
         "Choose a Quick Test Scenario:",
@@ -264,7 +276,7 @@ with tab3:
         "Raw Report Text / SMS Payload:",
         value=default_text,
         placeholder="Type or paste report here...",
-        height=100,
+        height=120,
     )
 
     if st.button("🚀 Process Report via Gemini AI", type="primary"):
